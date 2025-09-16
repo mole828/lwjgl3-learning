@@ -25,6 +25,7 @@ dependencies {
     // Project "app" depends on project "utils". (Project paths are separated with ":", so ":utils" refers to the top-level "utils" project.)
     implementation(project(":utils"))
 
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     implementation(platform("org.lwjgl:lwjgl-bom:$lwjglVersion"))
 

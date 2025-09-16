@@ -1,5 +1,6 @@
 package learning
 
+import kotlinx.coroutines.runBlocking
 import org.lwjgl.Version
 import org.lwjgl.glfw.Callbacks.glfwFreeCallbacks
 import org.lwjgl.glfw.GLFW.GLFW_DECORATED
@@ -74,7 +75,7 @@ class HelloWorld {
         glfwDefaultWindowHints() // optional, the current window hints are already the default
 //        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE) // the window will stay hidden after creation
 //        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE) // the window will be resizable
-        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE)
+//        glfwWindowHint(GLFW_DECORATED, GLFW_FALSE)
 
         // Create the window
         window = glfwCreateWindow(300, 300, "Hello World!", 0L, 0L)
@@ -114,6 +115,10 @@ class HelloWorld {
         glfwShowWindow(window)
     }
 
+    val scene = Scene(window = BaseWindow(window)).apply {
+        this.flashBackground()
+    }
+
     private fun loop() {
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
@@ -122,28 +127,19 @@ class HelloWorld {
         // bindings available for use.
         GL.createCapabilities()
 
+        var lastEnd = Clock.System.now()
         // Set the clear color
-        glClearColor(1.0f, 0.0f, 0.0f, 0.0f)
-
-
-        var redValue = 0f
-        var dRedValue = 0.01f
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while (!glfwWindowShouldClose(window)) {
 
-            redValue += dRedValue
-            when {
-                redValue < 0f -> {
-                    dRedValue = - dRedValue
-                    redValue = 0f
-                }
-                redValue > 1f -> {
-                    dRedValue = - dRedValue
-                    redValue = 1f
-                }
+            runBlocking {
+                val thisBegin = Clock.System.now()
+                val duration = thisBegin - lastEnd
+                scene.updateAndRender(duration)
+                lastEnd = Clock.System.now()
             }
-            glClearColor(redValue, 0.0f, 0.0f, 0.0f)
+
             glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT) // clear the framebuffer
 
             glfwSwapBuffers(window) // swap the color buffers
